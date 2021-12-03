@@ -111,10 +111,30 @@
         return next(action)
       }
 
+      const logger = (store) => (next) => (action) => {
+        console.group(action.type)
+          console.log('The action: ', action)
+          const result = next(action) // I don't understand what this is doing
+          console.log('The new state: ', store.getState())
+        console.groupEnd()
+        return result
+      }
+
+      const responder = (store) => (next) => (action) => {
+        if (action.type === ADD_GOAL) {return alert("That's a great goal!")}
+        if (action.type === ADD_TODO) {return alert(`Don't forget to ${action.todo.name}!`)}
+        return
+      }
+
+      // Send 1) Reducers and 2) Middleware functions to React to create store
       const store = Redux.createStore(Redux.combineReducers({
         todos,
         goals,
-      }), Redux.applyMiddleware(checker))
+      }), Redux.applyMiddleware(
+        checker,
+        logger,
+        responder
+      ))
 
       store.subscribe(() => {
         const {
